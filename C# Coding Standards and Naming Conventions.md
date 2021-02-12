@@ -9,7 +9,7 @@
 | Method arguments          | camelCase  |    128 | Yes    | No     | No     | Yes          | [A-z][0-9]         | No          |
 | Local variables           | camelCase  |     50 | Yes    | No     | No     | Yes          | [A-z][0-9]         | No          |
 | Constants name            | PascalCase |     50 | No     | No     | No     | No           | [A-z][0-9]         | No          |
-| Field name                | camelCase  |     50 | Yes    | No     | No     | Yes          | [A-z][0-9]         | Yes         |
+| Field name                | camelCase  |     50 | Yes    | No     | No     | Yes          | [A-z][0-9]         | No          |
 | Properties name           | PascalCase |     50 | Yes    | No     | No     | Yes          | [A-z][0-9]         | No          |
 | Delegate name             | PascalCase |    128 | No     | No     | Yes    | Yes          | [A-z]              | No          |
 | Enum type name            | PascalCase |    128 | Yes    | No     | No     | No           | [A-z]              | No          |
@@ -110,7 +110,7 @@ UIControl uiControl, nextUIControl;
 
 ***Why: consistent with the Microsoft's .NET Framework. Caps would grab visually too much attention.***
 
-#### 8. Do not use Underscores in identifiers. Exception: you can prefix private fields with an underscore:
+#### 8. Do not use Underscores in identifiers.
 
 ```csharp 
 // Correct
@@ -423,6 +423,78 @@ public static bool IsNullOrEmpty(string value) {
 ```
 
 ***Why: consistent with the Microsoft's .NET Framework and easy to read.***
+
+#### 27. Event Handlers should have the correct signature
+
+Delegate event handlers (i.e. delegates used as type of an event) should have a very specific signature:
+
+* Return type void.
+* First argument of type System.Object and named 'sender'.
+* Second argument of type System.EventArgs (or any derived type) and is named 'e'.
+
+```csharp 
+// Avoid
+public delegate void AlarmEventHandler(object s);
+
+public class Foo
+{
+    public event AlarmEventHandler Alarm;
+}
+
+// Correct
+public delegate void AlarmEventHandler(object sender, AlarmEventArgs e);
+
+public class AlarmEventArgs : EventArgs
+{
+    ...
+}
+
+public class Foo
+{
+    public event AlarmEventHandler Alarm;
+}
+
+// More better: Use generic EventHandler<>
+public class AlarmEventArgs : EventArgs
+{
+    ...
+}
+
+public class Foo
+{
+    public event EventHandler<AlarmEventArgs> Alarm;
+}
+
+```
+
+***Why: consistent with the Microsoft's .NET Framework and easy to read.***
+
+#### 28. Event-raising methods schould be protected virtual void and start with On
+
+The purpose of the method is to provide a way for a derived class to handle the event using an override. Overriding is a more flexible, faster, and more natural way to handle base class events in derived classes. By convention, the name of the method should start with "On" and be followed with the name of the event.
+
+```csharp 
+// Correct
+public class AlarmEventArgs : EventArgs
+{
+    ...
+}
+
+public class Foo
+{
+    public event EventHandler<AlarmEventArgs> Alarm;
+    
+    protected virtual void OnAlarmEvent(AlarmEventArgs e)
+    {
+        Alarm?.Invoke(this, e);
+    }
+}
+```
+
+***Why: consistent with the Microsoft's .NET Framework and easy to read.***
+
+
+
 
 ## Offical Reference
 
